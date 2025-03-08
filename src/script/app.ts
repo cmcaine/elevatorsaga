@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		app.startChallenge(app.currentChallengeIndex, true);
 	});
 	editor.on('code_success', () => {
-		presentCodeStatus(codestatus, codeStatusTempl);
+		presentCodeStatus(codestatus, codeStatusTempl, null);
 	});
 	editor.on('usercode_error', (eventName, error) => {
 		presentCodeStatus(codestatus, codeStatusTempl, error);

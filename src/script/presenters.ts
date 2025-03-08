@@ -1,5 +1,5 @@
 import { createParamsUrl } from './app.js';
-import { formatUserErrorStacktrace } from './base.js';
+import { USER_ERROR_REGEX } from './base.js';
 
 function makeFragment(html) {
 	const container = document.createElement('template');
@@ -205,21 +205,36 @@ export function presentWorld(worldElement, world, floorTempl, elevatorTempl, ele
 	});
 }
 
-export function presentCodeStatus(parent, templ, error?) {
-	console.log(error);
+function formatErrorMessage(error) {
+	if (!error) return '';
+	let msg = error.toString();
+	let stack = error.stack.toString();
+
+	// Trim repeated message on Chrome
+	if (stack.startsWith(msg)) {
+		stack = stack.replace(msg, '');
+	}
+
+	// Trim unneccessary parts of stack trace
+	stack = stack
+		.split(/\s*\n\s*/)
+		.map((line) => line.match(USER_ERROR_REGEX))
+		.filter((matches) => matches !== null)
+		.map((matches) => matches[0].replace(matches.groups['blob'], 'your_solution.js'))
+		.join('\n');
+
+	msg = msg.trim() + '\n' + stack.trim();
+	msg = msg.replaceAll('\n', '<br>');
+
+	return msg;
+}
+
+export function presentCodeStatus(parent, templ, error) {
 	const errorDisplay = error ? 'block' : 'none';
 	const successDisplay = error ? 'none' : 'block';
-	let errorMessage = error;
-	if (error && error.stack) {
-		errorMessage = error.stack;
-		errorMessage = formatUserErrorStacktrace(errorMessage);
-		errorMessage = errorMessage.replace(/\n/g, '<br>');
-	}
-	const status = riot.render(templ, {
-		errorMessage: errorMessage,
-		errorDisplay: errorDisplay,
-		successDisplay: successDisplay,
-	});
+
+	const errorMessage = formatErrorMessage(error);
+	const status = riot.render(templ, { errorMessage, errorDisplay, successDisplay });
 	parent.innerHTML = status;
 }
 

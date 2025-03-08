@@ -53,12 +53,8 @@ export const getModuleFromUserCode = async function (code) {
 	return userModule;
 };
 
-const USER_ERROR_REGEX = /blob:.+:(?<line>\d+):(?<column>\d+)(?=\)(?:\n|$))/g;
+export const USER_ERROR_REGEX = /^.*(?<blob>blob:.*?):(?<line>\d+):(?<column>\d+).*$/;
 
 export const isUserError = (error) => {
 	return USER_ERROR_REGEX.test(error.stack);
-};
-
-export const formatUserErrorStacktrace = (stacktrace) => {
-	return stacktrace.replaceAll(USER_ERROR_REGEX, 'USER_CODE: Line $<line>, column $<column>');
 };

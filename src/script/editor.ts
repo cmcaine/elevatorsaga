@@ -119,11 +119,11 @@ export class Editor extends Emitter {
 		try {
 			obj = await getModuleFromUserCode(code);
 			this.trigger('code_success');
+			return obj;
 		} catch (e) {
 			this.trigger('usercode_error', e);
-			return null;
+			throw e;
 		}
-		return obj;
 	}
 
 	setCode(code) {
