@@ -111,7 +111,8 @@ export default class Elevator extends Movable {
 		}
 	}
 
-	updateElevatorMovement(dt) {
+	update(dt) {
+		super.update(dt);
 		if (this.isBusy()) {
 			// TODO: Consider if having a nonzero velocity here should throw error..
 			return;

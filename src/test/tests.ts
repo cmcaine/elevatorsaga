@@ -55,7 +55,7 @@ describe('Elevator Saga', () => {
 		let u = null;
 
 		beforeEach(() => {
-			u = new User(.42);
+			u = new User(0.42);
 		});
 		it('updates display position when told to', () => {
 			u.moveTo(1.0, 1.0);
@@ -237,7 +237,6 @@ describe('Elevator Saga', () => {
 				e.goToFloor(floor);
 				timeForwarder(10.0, 0.015, (dt) => {
 					e.update(dt);
-					e.updateElevatorMovement(dt);
 				});
 				const expectedY = floorHeight * (floorCount - 1) - floorHeight * floor;
 				expect(e.y).toBe(expectedY);
@@ -251,13 +250,11 @@ describe('Elevator Saga', () => {
 			e.goToFloor(1);
 			timeForwarder(0.2, 0.015, (dt) => {
 				e.update(dt);
-				e.updateElevatorMovement(dt);
 			});
 			expect(e.y).not.toBe(originalY);
 			e.goToFloor(0);
 			timeForwarder(10.0, 0.015, (dt) => {
 				e.update(dt);
-				e.updateElevatorMovement(dt);
 			});
 			expect(e.y).toBe(originalY);
 			expect(e.currentFloor).toBe(0);
@@ -294,7 +291,6 @@ describe('Elevator Saga', () => {
 			e.goToFloor(1);
 			timeForwarder(0.01, 0.015, (dt) => {
 				e.update(dt);
-				e.updateElevatorMovement(dt);
 			});
 			expect(e.isApproachingFloor(0)).toBe(false);
 		});
@@ -303,7 +299,6 @@ describe('Elevator Saga', () => {
 			e.goToFloor(1);
 			timeForwarder(0.01, 0.015, (dt) => {
 				e.update(dt);
-				e.updateElevatorMovement(dt);
 			});
 			expect(e.isApproachingFloor(2)).toBe(true);
 		});
@@ -313,7 +308,6 @@ describe('Elevator Saga', () => {
 			e.goToFloor(2);
 			timeForwarder(0.01, 0.015, (dt) => {
 				e.update(dt);
-				e.updateElevatorMovement(dt);
 			});
 			expect(e.isApproachingFloor(2)).toBe(true);
 		});
@@ -326,7 +320,6 @@ describe('Elevator Saga', () => {
 			e.goToFloor(1);
 			timeForwarder(10.0, 0.015, (dt) => {
 				e.update(dt);
-				e.updateElevatorMovement(dt);
 			});
 			expect(e.currentFloor).toBe(1);
 			expect(handlers.someHandler).not.toHaveBeenCalled();
@@ -336,7 +329,6 @@ describe('Elevator Saga', () => {
 			e.goToFloor(2);
 			timeForwarder(10.0, 0.015, (dt) => {
 				e.update(dt);
-				e.updateElevatorMovement(dt);
 			});
 			expect(e.currentFloor).toBe(2);
 			expect(handlers.someHandler.calls.count()).toEqual(1);
@@ -347,7 +339,6 @@ describe('Elevator Saga', () => {
 			e.goToFloor(3);
 			timeForwarder(10.0, 0.015, (dt) => {
 				e.update(dt);
-				e.updateElevatorMovement(dt);
 			});
 			expect(e.currentFloor).toBe(3);
 			expect(handlers.someHandler.calls.count()).toEqual(2);
@@ -359,7 +350,6 @@ describe('Elevator Saga', () => {
 			e.goToFloor(3);
 			timeForwarder(10.0, 0.015, (dt) => {
 				e.update(dt);
-				e.updateElevatorMovement(dt);
 			});
 			expect(e.currentFloor).toBe(3);
 			expect(handlers.someHandler.calls.count()).toEqual(2);
@@ -377,7 +367,6 @@ describe('Elevator Saga', () => {
 			e.goToFloor(2);
 			timeForwarder(3.0, 0.01401, (dt) => {
 				e.update(dt);
-				e.updateElevatorMovement(dt);
 			});
 			expect(passingFloorEventCount).toBeGreaterThan(0, 'event count');
 			expect(e.getExactCurrentFloor()).toBeLessThan(1.15, 'current floor');
@@ -390,7 +379,6 @@ describe('Elevator Saga', () => {
 				e.goToFloor(3);
 				timeForwarder(5.0, STEPSIZE, (dt) => {
 					e.update(dt);
-					e.updateElevatorMovement(dt);
 					// @ts-ignore
 					expect(e.getExactCurrentFloor()).toBeWithinRange(1.0, 3.0, `(STEPSIZE is ${STEPSIZE})`);
 				});
@@ -445,21 +433,18 @@ describe('Elevator Saga', () => {
 				elevInterface.goToFloor(2);
 				timeForwarder(10, 0.015, (dt) => {
 					e.update(dt);
-					e.updateElevatorMovement(dt);
 				});
 				expect(e.y).not.toBe(originalY);
 
 				elevInterface.goToFloor(0);
 				timeForwarder(0.2, 0.015, (dt) => {
 					e.update(dt);
-					e.updateElevatorMovement(dt);
 				});
 				const whenMovingY = e.y;
 
 				elevInterface.stop();
 				timeForwarder(10, 0.015, (dt) => {
 					e.update(dt);
-					e.updateElevatorMovement(dt);
 				});
 				expect(e.y).not.toBe(whenMovingY);
 				expect(e.y).not.toBe(originalY);
@@ -529,7 +514,6 @@ describe('Elevator Saga', () => {
 				});
 				timeForwarder(3.0, 0.01401, (dt) => {
 					e.update(dt);
-					e.updateElevatorMovement(dt);
 				});
 				expect(passingFloorEventCount).toBeGreaterThan(0);
 			});

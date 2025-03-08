@@ -159,7 +159,7 @@ export class World extends Emitter {
 				user.elevatorAvailable(elevator, this.floors[elevator.currentFloor]);
 			}
 		}
-	}
+	};
 
 	#handleButtonRepressing = (eventName, floor) => {
 		// Need randomize iteration order or we'll tend to fill upp first elevator
@@ -184,7 +184,7 @@ export class World extends Emitter {
 				}
 			}
 		}
-	}
+	};
 
 	update(dt) {
 		this.elapsedTime += dt;
@@ -198,7 +198,6 @@ export class World extends Emitter {
 		// Use regular for loops for performance and memory friendlyness
 		for (const elevator of this.elevators) {
 			elevator.update(dt);
-			elevator.updateElevatorMovement(dt);
 		}
 		for (const user of this.users) {
 			user.update(dt);
