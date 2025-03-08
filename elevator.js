@@ -16,6 +16,11 @@ function Elevator(speedFloorsPerSec, floorCount, floorHeight, maxUsers) {
     // isMoving flag is needed when going to same floor again - need to re-raise events
     elevator.isMoving = false;
 
+    // Doors are open at the start of the level, closed when the elevator
+    // starts to move, and opened again when an elevator stops exactly on a
+    // floor.
+    elevator.isDoorOpen = true
+
     elevator.goingDownIndicator = true;
     elevator.goingUpIndicator = true;
 
@@ -34,13 +39,25 @@ function Elevator(speedFloorsPerSec, floorCount, floorHeight, maxUsers) {
 
     elevator.on("change:goingUpIndicator", function(value){
         elevator.trigger("indicatorstate_change", {up: elevator.goingUpIndicator, down: elevator.goingDownIndicator});
+        this.maybeNotifyUsers()
     });
 
     elevator.on("change:goingDownIndicator", function(value){
         elevator.trigger("indicatorstate_change", {up: elevator.goingUpIndicator, down: elevator.goingDownIndicator});
+        this.maybeNotifyUsers()
     });
 };
 Elevator.prototype = Object.create(Movable.prototype);
+
+// Notify users of the elevator that they might want to enter or exit.
+Elevator.prototype.maybeNotifyUsers = function() {
+    if (this.isDoorOpen) {
+        // Need to allow users to get off first, so that new ones
+        // can enter on the same floor
+        this.trigger("exit_available", this.currentFloor, this);
+        this.trigger("entrance_available", this);
+    }
+}
 
 Elevator.prototype.setFloorPosition = function(floor) {
     var destination = this.getYPosOfFloor(floor);
@@ -54,6 +71,7 @@ Elevator.prototype.userEntering = function(user) {
     for(var i=0; i<this.userSlots.length; i++) {
         var slot = this.userSlots[(i + randomOffset) % this.userSlots.length];
         if(slot.user === null) {
+            this.trigger("users_holding_door")
             slot.user = user;
             return slot.pos;
         }
@@ -76,6 +94,7 @@ Elevator.prototype.userExiting = function(user) {
     for(var i=0; i<this.userSlots.length; i++) {
         var slot = this.userSlots[i];
         if(slot.user === user) {
+            this.trigger("users_holding_door")
             slot.user = null;
         }
     }
@@ -133,6 +152,10 @@ Elevator.prototype.updateElevatorMovement = function(dt) {
         this.isMoving = false;
         this.handleDestinationArrival();
     }
+    if (this.isMoving) {
+        // If the vehicle is moving then we must stay inside!
+        this.isDoorOpen = false
+    }
 };
 
 Elevator.prototype.handleDestinationArrival = function() {
@@ -142,10 +165,8 @@ Elevator.prototype.handleDestinationArrival = function() {
         this.buttonStates[this.currentFloor] = false;
         this.trigger("floor_buttons_changed", this.buttonStates, this.currentFloor);
         this.trigger("stopped_at_floor", this.currentFloor);
-        // Need to allow users to get off first, so that new ones
-        // can enter on the same floor
-        this.trigger("exit_available", this.currentFloor, this);
-        this.trigger("entrance_available", this);
+        this.isDoorOpen = true
+        this.maybeNotifyUsers()
     }
 };
 

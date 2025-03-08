@@ -60,7 +60,8 @@ var asElevatorInterface = function(obj, elevator, floorCount, errorHandler) {
         if(elevatorInterface.destinationQueue.length && epsilonEquals(_.first(elevatorInterface.destinationQueue), position)) {
             // Reached the destination, so remove element at front of queue
             elevatorInterface.destinationQueue = _.rest(elevatorInterface.destinationQueue);
-            if(elevator.isOnAFloor()) {
+            if(!elevator.isBusy() && elevator.isOnAFloor()) {
+                // A pause for the doors to open, users to get on and off, etc.
                 elevator.wait(1, function() {
                     elevatorInterface.checkDestinationQueue();
                 });
@@ -69,6 +70,16 @@ var asElevatorInterface = function(obj, elevator, floorCount, errorHandler) {
             }
         }
     });
+    // This can be triggered if an elevator changes its indicator lights at a
+    // time other than the "stopped_at_floor" event.
+    elevator.on("users_holding_door", function() {
+        if (!elevator.isBusy()) {
+            console.log("holding_door", elevator.currentFloor)
+            elevator.wait(1, function() {
+                elevatorInterface.checkDestinationQueue();
+            });
+        }
+    })
 
     elevator.on("passing_floor", function(floorNum, direction) {
         tryTrigger("passing_floor", floorNum, direction);
